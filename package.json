@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "A bot for Tik to program when he's bored",
   "author": "TikhonK",
+  "engines": {
+    "node": "6.9.1"
+  },
   "license": "MIT",
   "private": true,
   "dependencies": {
