@@ -71,7 +71,7 @@ client.on('guildMemberAdd', function(member) {
             channel.send({embed: {
               color: 6038109,
               title: "Success!",
-              description: `<@${member.id}>, you have successfully joined **${team}**`
+              description: `<@${member.id}>, you have successfully joined **${team}**\nCongratulations! Now I invite you to check our <#330660654375501824>, <#327613279394463744> and <#327613450475798530> channels`
             }});
           }
         });
