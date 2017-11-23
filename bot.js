@@ -1,9 +1,9 @@
-const discord = require('discord.js');
-const client = new discord.Client();
 const fs = require('fs');
 const config = JSON.parse(fs.readFileSync('./settings.json'));
 const prefix = config.prefix;
 const role = JSON.parse(fs.readFileSync('./roles.json'));
+const discord = require('discord.js');
+const client = new discord.Client();
 
 client.login(config.token);
 
