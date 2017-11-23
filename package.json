@@ -10,8 +10,6 @@
   "private": true,
   "dependencies": {
     "express": "4.6.1",
-    "discord.js": "^11.2.1",
-    "fs": "0.0.1",
     "google-translate-api": "^2.3.0",
     "node-lame": "^1.0.4"
   },
