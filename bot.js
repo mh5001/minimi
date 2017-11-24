@@ -4,11 +4,17 @@ const prefix = config.prefix;
 const role = JSON.parse(fs.readFileSync('./roles.json'));
 const discord = require('discord.js');
 const client = new discord.Client();
+const snek = require('snekfetch');
 
 client.login(config.token);
 
 client.on('ready', function(){
   console.log("I am Ready!");
+});
+
+process.on('unhandledRejection', (err) => {
+  console.log(err);
+  return;
 });
 
 client.on('guildMemberAdd', function(member) {
@@ -95,5 +101,22 @@ client.on('message', function(message) {
     if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send(`<@${message.author.id}>, you have no perm for this command!`);
     const input = message.content.split(' ').slice(1).join('');
     message.channel.bulkDelete(input);
+  } else if (lower.startsWith(prefix + 'cat')) {
+    var image = '';
+    const input = message.content.split(' ').slice(1);
+    snek.get('https://catfact.ninja/fact?max_length=1000').then(res => {
+      const text = JSON.parse(res.text).fact;
+      snek.get('http://random.cat/meow').then(res => {
+        const image = JSON.parse(res.text).file;
+        message.channel.send({embed: {
+          title: "Cat Fact!",
+          color: Math.round(Math.random() * 16777215),
+          description: `Did you know: ${text}`,
+          image:{
+            url: image
+          }
+        }});
+      });
+    });
   }
 });
