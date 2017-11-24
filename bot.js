@@ -118,5 +118,11 @@ client.on('message', function(message) {
         }});
       });
     });
+  } else if (lower.startsWith(prefix + 'invite')) {
+    message.channel.send({embed: {
+      title: "It seems like you are interested in this bot!",
+      color: 4372980,
+      description: "[__**CLICK ME**__](https://discordapp.com/api/oauth2/authorize?client_id=383344287024152627&scope=bot&permissions=1) to invite it to your server!"
+    }});
   }
 });
