@@ -18,6 +18,7 @@ process.on('unhandledRejection', (err) => {
 });
 
 client.on('guildMemberAdd', function(member) {
+  if (member.guild.id !== '327610489871925249') return;
   const channel = client.guilds.get('327610489871925249').channels.get('327610489871925249');
   channel.send({embed: {
     title: "Hello and welcome to the server!",
@@ -100,7 +101,7 @@ client.on('message', function(message) {
   if (lower.startsWith(prefix + 'purge')) {
     if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send(`<@${message.author.id}>, you have no perm for this command!`);
     const input = message.content.split(' ').slice(1).join('');
-    message.channel.bulkDelete(input);
+    message.channel.bulkDelete(input + 1);
   } else if (lower.startsWith(prefix + 'cat')) {
     var image = '';
     const input = message.content.split(' ').slice(1);
@@ -124,5 +125,26 @@ client.on('message', function(message) {
       color: 4372980,
       description: "[__**CLICK ME**__](https://discordapp.com/api/oauth2/authorize?client_id=383344287024152627&scope=bot&permissions=1) to invite it to your server!"
     }});
+  } else if (lower.startsWith(prefix + 'car')) {
+    snek.get('https://funfactz.com/tags/car/random/')
+    .then(res => {
+      const input = res.text;
+      const value = input.substring(input.indexOf('<div class="fact_text"') + 39, input.indexOf('<div class="fact_text"') + 300);
+      const fact = value.split('<').slice(0,1).join('');
+      snek.get('https://pixabay.com/api/?key=7194685-1f142c0977028bfadc6cd5c42&q=car&image_type=photo&pretty=true')
+      .then(res => {
+        const input = JSON.parse(res.text);
+        const hit = input.hits.length;
+        const image = input.hits[Math.round(Math.random() * hit)].webformatURL;
+        message.channel.send({embed: {
+          color: Math.round(Math.random() * 16777215),
+          title: "Car Facts!",
+          description: `Did you know: ${fact}`,
+          image: {
+            url: image
+          }
+        }});
+      });
+    });
   }
 });
