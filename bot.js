@@ -5,6 +5,12 @@ const role = JSON.parse(fs.readFileSync('./roles.json'));
 const discord = require('discord.js');
 const client = new discord.Client();
 const snek = require('snekfetch');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('data');
+
+/*db.serialize(function() {
+  db.run("CREATE TABLE tag (name TEXT, info TEXT)");
+});*/
 
 client.login(config.token);
 
@@ -101,7 +107,7 @@ client.on('message', function(message) {
   if (lower.startsWith(prefix + 'purge')) {
     if (!message.member.hasPermission('ADMINISTRATOR')) return message.channel.send(`<@${message.author.id}>, you have no perm for this command!`);
     const input = message.content.split(' ').slice(1).join('');
-    message.channel.bulkDelete(input + 1);
+    message.channel.bulkDelete(parseInt(input) + 1);
   } else if (lower.startsWith(prefix + 'cat')) {
     var image = '';
     const input = message.content.split(' ').slice(1);
@@ -146,5 +152,50 @@ client.on('message', function(message) {
         }});
       });
     });
+  } else if (lower.startsWith(prefix + 'tag')) {
+    const input = message.content.split(' ').slice(1);
+    if (input[0] == 'add') {
+      const id = message.author.id;
+      message.channel.send("Please specify the name of the tag you wanted to add! Request will timeout after 1 minute.")
+      .then(message => {
+        message.channel.awaitMessages(input => {
+          return input.author.id == id}, {
+            max: 1,
+            time: 60000,
+            errors: ['time']
+          }).then(col => {
+            var stop = false;
+            db.serialize(function() {
+              db.each("SELECT name FROM tag", function(err, row) {
+                if (row.name == tagName) return stop = true;
+              });
+            });
+          if(stop) return;
+          const tagName = col.first().content;
+          message.channel.send("Tag Created! Please specify what the tag content should be! Request will timeout after 2 minutes.")
+          .then(message => {
+            message.channel.awaitMessages(input => {
+              return input.author.id == id }, {
+                max: 1,
+                time: 120000,
+                errors: ['time']
+              }).then(col => {
+              const tagCont = col.first().content;
+              message.channel.send("Success!");
+              db.serialize(function() {
+                var toDB = db.prepare("INSERT INTO tag VALUES (?,?)");
+                toDB.run(tagName, tagCont);
+                toDB.finalize();
+              });
+            }).catch(err => {
+              console.log(err);
+                return message.channel.send('Request timed out');
+            })
+          });
+        }).catch(err => {
+          return message.channel.send('Request timed out');
+        });
+      });
+    }
   }
 });
