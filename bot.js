@@ -15,7 +15,7 @@ const db = new sqlite3.Database('data');
 client.login(config.token);
 
 client.on('ready', function(){
-  console.log("I am Ready!");
+  console.log(`${client.user.username} is ready`);
 });
 
 process.on('unhandledRejection', (err) => {
@@ -152,50 +152,75 @@ client.on('message', function(message) {
         }});
       });
     });
-  } else if (lower.startsWith(prefix + 'tag')) {
-    const input = message.content.split(' ').slice(1);
-    if (input[0] == 'add') {
-      const id = message.author.id;
-      message.channel.send("Please specify the name of the tag you wanted to add! Request will timeout after 1 minute.")
-      .then(message => {
-        message.channel.awaitMessages(input => {
-          return input.author.id == id}, {
-            max: 1,
-            time: 60000,
-            errors: ['time']
-          }).then(col => {
-            var stop = false;
-            db.serialize(function() {
-              db.each("SELECT name FROM tag", function(err, row) {
-                if (row.name == tagName) return stop = true;
-              });
-            });
-          if(stop) return;
-          const tagName = col.first().content;
-          message.channel.send("Tag Created! Please specify what the tag content should be! Request will timeout after 2 minutes.")
-          .then(message => {
-            message.channel.awaitMessages(input => {
-              return input.author.id == id }, {
-                max: 1,
-                time: 120000,
-                errors: ['time']
-              }).then(col => {
-              const tagCont = col.first().content;
-              message.channel.send("Success!");
-              db.serialize(function() {
-                var toDB = db.prepare("INSERT INTO tag VALUES (?,?)");
-                toDB.run(tagName, tagCont);
-                toDB.finalize();
-              });
-            }).catch(err => {
-              console.log(err);
-                return message.channel.send('Request timed out');
-            })
-          });
-        }).catch(err => {
-          return message.channel.send('Request timed out');
-        });
+  } else if (lower.startsWith(prefix + 'wiki')) {
+    const input = message.content.split(' ').slice(1).join(' ');
+    const writer = message.author;
+    snek.get(`http://rr3.wikia.com/wiki/Special:Search?search=${input}`)
+    .then(res => {
+      const result = res.text.substring(res.text.indexOf('class="Results"'), res.text.indexOf('class="Results"')  + 50000).replace(/\t/g,'').replace(/\n/g,'');
+      var outputs = result.match(/<h1>(.*?)<\/h1>/g);
+      outputs = outputs.slice(0,6);
+      outputs.splice(2,1);
+      var link = [];
+      var title = [];
+      outputs.map(ele => {
+        link.push(ele.substring(ele.indexOf('http:'), ele.indexOf('"',ele.indexOf('http:'))));
+        title.push(ele.substring(ele.indexOf(' >') + 2, ele.indexOf('<', ele.indexOf(' >'))))
       });
-    }
+      var i = 0;
+      title.map(ele => {
+        i++
+        title[i - 1] = `**${i}:** ${ele}`
+      });
+      var upper = input.split('');
+      upper[0] = upper[0].toUpperCase();
+      upper = upper.join('');
+      message.channel.send({embed: {
+        title: `Top 5 results for: ${upper} (Click to go to Wiki)`,
+        url: 'http://rr3.wikia.com/wiki/Special:Search?search=${input}',
+        color: 766651,
+        description: title.join('\n'),
+        footer: {
+          text: "Please specify the number of the search you want, result timeout after 1 minute!"
+        }
+      }}).then(message => {
+        message.channel.awaitMessages(input => {
+          return input.author.id == writer.id;
+        }, {
+          max: 1,
+          time: 60000,
+          errors: ['time']
+        }).then(col => {
+          message.delete();
+          var input = parseInt(col.first().content);
+          if (isNaN(input)) return message.channel.send("Invalid Number");
+          if (input > 5) return message.channel.send("Number too large!");
+          if (input < 1) return message.channel.send("Number too small!");
+          input = input - 1;
+          snek.get(link[input]).then(res => {
+            const first = res.text.substring(res.text.indexOf('<p>'),res.text.indexOf('</p>')).replace(/<(.*?)\>/g,'');
+            const second = res.text.substring(res.text.indexOf('<p>',res.text.indexOf('</p>')),res.text.indexOf('</p>',res.text.indexOf('<p>',res.text.indexOf('</p>')))).replace(/<(.*?)\>/g,'')
+            const image = res.text.substring(res.text.indexOf('class="pi-item pi-image"'), res.text.indexOf('class="pi-item pi-image"') + 5000).match(/(https?:\/\/.*\.(?:png|jpg))/g)[0];
+            message.channel.send({embed: {
+              title: `Results for: ${title[input].substring(7,99)}`,
+              color: 766651,
+              fields: [
+                {
+                  name: "First Paragraph",
+                  value: first
+                },
+                {
+                  name: "Second Paragraph",
+                  value: second
+                }
+              ],
+              image: {
+                url: image
+              }
+            }});
+          });
+        });
+      })
+    });
   }
 });
