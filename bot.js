@@ -25,7 +25,7 @@ process.on('unhandledRejection', (err) => {
 
 client.on('guildMemberAdd', function(member) {
   if (member.guild.id !== '327610489871925249') return;
-  const channel = client.guilds.get('327610489871925249').channels.get('327610489871925249');
+  const channel = client.guilds.get('327610489871925249').channels.get('386466429467099137');
   channel.send({embed: {
     title: "Hello and welcome to the server!",
     color: 6038109,
@@ -222,5 +222,41 @@ client.on('message', function(message) {
         });
       })
     });
+  } else if (lower.startsWith(prefix + 'eval')) {
+    if (message.author.id !== '163434302758060033') return;
+    const input = message.content.split(' ').slice(1).join(' ');
+    try {
+      const evaled = eval(input);
+      return message.channel.send({embed: {
+        description: "**__Success!__**",
+        color: 3332109,
+        fields: [
+          {
+            name: "Input",
+            value: '```' + input + '```'
+          },
+          {
+            name: "Output",
+            value: '```' + evaled + '```'
+          }
+        ]
+      }});
+    } catch (err) {
+        const error = err.toString();
+        if(err) return message.channel.send({embed: {
+          description: "**__Error!__**",
+          color: 14169103,
+          fields: [
+            {
+              name: "Input",
+              value: '```' + input + '```'
+            },
+            {
+              name: "Output",
+              value: '```' + error + '```'
+            }
+          ]
+        }});
+    }
   }
 });
