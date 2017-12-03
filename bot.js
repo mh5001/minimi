@@ -258,5 +258,26 @@ client.on('message', function(message) {
           ]
         }});
     }
+  } else if (lower.startsWith(prefix + 'test')) {
+    message.channel.send('Test!')
+    .then(message => {
+      message.react('☑');
+      message.awaitReactions(reaction => {
+        if (reaction.count > 1) {
+          if (reaction._emoji.name == '☑') return message.channel.send('You chosed ☑');
+        }
+      },{
+        time: 10000,
+        errors: ['time']
+      }).catch(err => {
+        message.channel.send("Timed out!");
+      });
+    });
+  } else if (lower.startsWith(prefix + 'change')) {
+    if (message.author.id !== '163434302758060033') return;
+    const input = message.content.split(' ').slice(1).join(' ');
+    fs.writeFileSync('./test.txt',input);
+  } else if (lower.startsWith(prefix + 'read')) {
+    message.channel.send(fs.readFileSync('./test.txt','utf-8'));
   }
 });
