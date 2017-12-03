@@ -281,11 +281,11 @@ client.on('message', function(message) {
   } else if (lower.startsWith(prefix + 'change')) {
     if (message.author.id !== '163434302758060033') return;
     const input = message.content.split(' ').slice(1).join(' ');
-    fs.writeFile('./test.txt',input, err => {
+    fs.writeFile('./ignore/test.txt',input, err => {
       if (err) return message.channel.send('err');
       message.channel.send('success');
     });
   } else if (lower.startsWith(prefix + 'read')) {
-    message.channel.send(fs.readFileSync('./test.txt','utf-8'));
+    message.channel.send(fs.readFileSync('./ignore/test.txt','utf-8'));
   }
 });
