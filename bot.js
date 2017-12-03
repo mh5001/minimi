@@ -23,6 +23,11 @@ process.on('unhandledRejection', (err) => {
   return;
 });
 
+process.on('error',function(err) {
+  console.log(err);
+  return;
+});
+
 client.on('guildMemberAdd', function(member) {
   if (member.guild.id !== '327610489871925249') return;
   const channel = client.guilds.get('327610489871925249').channels.get('386466429467099137');
@@ -276,7 +281,10 @@ client.on('message', function(message) {
   } else if (lower.startsWith(prefix + 'change')) {
     if (message.author.id !== '163434302758060033') return;
     const input = message.content.split(' ').slice(1).join(' ');
-    fs.writeFileSync('./test.txt',input);
+    fs.writeFile('./test.txt',input, err => {
+      if (err) return message.channel.send('err');
+      message.channel.send('success');
+    });
   } else if (lower.startsWith(prefix + 'read')) {
     message.channel.send(fs.readFileSync('./test.txt','utf-8'));
   }
