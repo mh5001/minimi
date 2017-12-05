@@ -278,14 +278,13 @@ client.on('message', function(message) {
         message.channel.send("Timed out!");
       });
     });
-  } else if (lower.startsWith(prefix + 'change')) {
-    if (message.author.id !== '163434302758060033') return;
-    const input = message.content.split(' ').slice(1).join(' ');
-    fs.writeFile('./ignore/test.txt',input, err => {
-      if (err) return message.channel.send('err');
-      message.channel.send('success');
+  } else if (lower.startsWith(prefix + 'joke')) {
+    snek.get(`https://onelinefun.com/car/${Math.round(Math.random() * 6 + 1)}/`)
+    .then(res => {
+      const input = res.text.substring(res.text.indexOf('<article>'), res.text.indexOf('</article>'));
+      const items = input.match(/\<p>(.*?)\<\/p>/g);
+      const joke = items[Math.round(Math.random() * items.length)].replace(/\<(.*?)\>/g,'').replace(/\&(.*?)\;/g,'"');
+      message.channel.send(`🚙 **|** ${joke}`);
     });
-  } else if (lower.startsWith(prefix + 'read')) {
-    message.channel.send(fs.readFileSync('./ignore/test.txt','utf-8'));
   }
 });
