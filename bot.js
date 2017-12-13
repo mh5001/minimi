@@ -14,6 +14,10 @@ const db = new sqlite3.Database('data');
 
 client.login(config.token);
 
+eval(fs.readFileSync('./chess.js','utf-8'));
+
+require('./music.js');
+
 client.on('ready', function(){
   console.log(`${client.user.username} is ready`);
 });
