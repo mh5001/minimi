@@ -7,16 +7,22 @@ const client = new discord.Client();
 const snek = require('snekfetch');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('data');
+const blowfish = require('blowfish');
+
+const bf = new blowfish(config.key,'ecb');
+const file = fs.readFileSync('./random.file','utf-8');
 
 /*db.serialize(function() {
   db.run("CREATE TABLE tag (name TEXT, info TEXT)");
 });*/
 
-client.login(config.token);
+const decyrpt = bf.decrypt(file).toString();
+
+client.login(decyrpt.substring(0,59));
 
 eval(fs.readFileSync('./chess.js','utf-8'));
 
-require('./music.js');
+//require('./music.js');
 
 client.on('ready', function(){
   console.log(`${client.user.username} is ready`);
